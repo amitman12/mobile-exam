@@ -36,6 +36,38 @@ app.get('/api/items/:itemId', (req, res) => {
     });
 });
 
+app.get('/api/orders/:orderId/getOrderLines', (req, res) => {
+    const orderId = req.params.orderId;
+    const loc = allOrders.findIndex(order => order.id == orderId);
+    if (loc === -1) {
+        //assume order id is unique
+        // edge case
+        //for now we only change array in memory
+        res.status(404).send('Order not found.');
+        return;
+    }
+    const order = allOrders[loc];
+    let responseArray: any[] = [];
+    let countItems = 0;
+    let itemLoc = 0;
+    while (countItems < order.itemQuantity) {
+        let currentItemId = order.items[itemLoc].id;
+        responseArray.splice(itemLoc, 0, {
+            item: {
+                id: currentItemId,
+                name: products[currentItemId].name,
+                price: products[currentItemId].price,
+                image: products[currentItemId].images.small
+            },
+            quantity: order.items[itemLoc].quantity
+        });
+        countItems += order.items[itemLoc].quantity;
+        itemLoc++;
+    }
+    res.send(responseArray);
+
+})
+
 app.post('/api/orders/:orderId/changeOrderDeliveryStatus', (req, res) => {
     const orderId = req.params.orderId;
     const deliveryStatus = req.body.deliveryStatus;

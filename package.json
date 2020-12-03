@@ -18,8 +18,5 @@
     "concurrently": "^5.2.0",
     "lerna": "^3.13.1"
   },
-  "dependencies": {
-    "@types/react-router-dom": "^5.1.6",
-    "react-router-dom": "^5.2.0"
-  }
+  "dependencies": {}
 }

@@ -1,20 +1,26 @@
 import React, {Component} from 'react';
-import {createApiClient, Order, Item} from './api';
+import {createApiClient, Order, Item, OrderLine} from './api';
+import './ExpandingLabel.scss';
+
 
 interface IProps {
     order: Order
 }
 
 interface IState {
+    displayedText: string
     isClicked: boolean,
-    items?: Item[]
+    items?: OrderLine[]
 }
+
+const api = createApiClient();
 
 export class ExpandingLabel extends React.Component<IProps, IState> {
     public constructor(props: IProps) {
         super(props)
         this.state = {
-            isClicked: false,
+            displayedText: 'Show items',
+            isClicked: false
         }
 
         this.setState = this.setState.bind(this);
@@ -28,23 +34,45 @@ export class ExpandingLabel extends React.Component<IProps, IState> {
     }
 
     toggleClicked(state: { isClicked: boolean }) {
+        let newText = (state.isClicked) ? 'Show items' : 'Hide items';
         return {
-            isClicked: !state.isClicked
+            displayedText: newText,
+            isClicked: !state.isClicked,
         };
     }
 
-    render() {
-        return (
-            <div>
-                <h4
-                    onClick={this.handleClicked}
-                >
-                    {this.props.order.itemQuantity} Items
-                    {this.state.isClicked && <div>Hovering right now</div>}
-                </h4>
-            </div>
-        );
+    async componentDidMount() {
+        this.setState({
+            items: await api.getOrderLines(this.props.order.id)
+        });
     }
 
+
+    render() {
+        const {items} = this.state;
+        return (<div>
+            <h4>
+                <a onClick={this.handleClicked}>{this.state.displayedText}</a>
+                {/*{this.state.isClicked && <div>text...</div>}*/}
+                <div>{items && this.state.isClicked ? this.renderOrderLines(items) : null}</div>
+            </h4>
+        </div>);
+    }
+
+
+    renderOrderLines = (items: OrderLine[]) => {
+        return (
+            <div className={'itemCard'}>
+                {items.map((line) => (
+                    <div>
+                        <div className={'image'}><img src={line.item.image} alt={''}/></div>
+                        <div className={'name'}>{line.item.name}</div>
+                        <div className={'price'}>{line.item.price}$</div>
+                    </div>
+                ))}
+            </div>
+        )
+    };
 }
+
 

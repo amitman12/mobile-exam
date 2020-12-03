@@ -28,11 +28,17 @@ export type Item = {
     price: number;
     image: string;
 }
+//line in ExpandingLabel..
+export type OrderLine = {
+    item: Item;
+    quantity: number;
+}
 
 export type ApiClient = {
     getOrders: () => Promise<Order[]>;
     getItem: (itemId: string) => Promise<Item>;
     changeOrderDeliveryStatus: (orderId: number, deliveryStatus: string) => Promise<void>;
+    getOrderLines: (orderId: number) => Promise<OrderLine[]>;
 }
 
 export const createApiClient = (): ApiClient => {
@@ -48,6 +54,9 @@ export const createApiClient = (): ApiClient => {
             return axios.post(`http://localhost:3232/api/orders/${orderId}/changeOrderDeliveryStatus`, {
                 deliveryStatus: deliveryStatus
             }).then((res) => res.data);
+        },
+        getOrderLines: (orderId: number) => {
+            return axios.get(`http://localhost:3232/api/orders/${orderId}/getOrderLines`).then((res) => res.data);
         }
     }
 }

@@ -4,7 +4,6 @@ import {createApiClient, Order} from './api';
 import {ExpandingLabel} from "./ExpandingLabel";
 
 
-
 export type AppState = {
     orders?: Order[],
     search: string;
@@ -47,30 +46,33 @@ export class App extends React.PureComponent<{}, AppState> {
             .filter((order) => (order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase()));
 
         return (
-                <div className='orders'>
-                    {filteredOrders.map((order) => (
-                        <div className={'orderCard'}>
-                            <div className={'generalData'}>
-                                <h6>{order.id}</h6>
-                                <h4>{order.customer.name}</h4>
-                                <h5>Order Placed: {new Date(order.createdDate).toLocaleDateString()}</h5>
-                            </div>
-                            <div className={'fulfillmentData'}>
-                                <ExpandingLabel order={order}/>
-                                {/*<h4>{order.itemQuantity} Items</h4>*/}
-                                <img src={App.getAssetByStatus(order.fulfillmentStatus)}/>
-                                {order.fulfillmentStatus !== 'canceled' &&
-                                <a onClick={() => this.handleChangeDeliveryStatus(order)}>Mark
-                                    as {order.fulfillmentStatus === 'fulfilled' ? 'Not Delivered' : 'Delivered'}</a>
-                                }
-                            </div>
-                            <div className={'paymentData'}>
-                                <h4>{order.price.formattedTotalPrice}</h4>
-                                <img src={App.getAssetByStatus(order.billingInfo.status)}/>
-                            </div>
+            <div className='orders'>
+                {filteredOrders.map((order) => (
+                    <div className={'orderCard'}>
+                        <div className={'generalData'}>
+                            <h6>{order.id}</h6>
+                            <h4>{order.customer.name}</h4>
+                            <h5>Order Placed: {new Date(order.createdDate).toLocaleDateString()}</h5>
+                            {/*<ExpandingLabel order={order}/>*/}
                         </div>
-                    ))}
-                </div>
+                        <div className={'fulfillmentData'}>
+                            <h4>{order.itemQuantity} Items</h4>
+                            <img src={App.getAssetByStatus(order.fulfillmentStatus)}/>
+                            {order.fulfillmentStatus !== 'canceled' &&
+                            <a onClick={() => this.handleChangeDeliveryStatus(order)}>Mark
+                                as {order.fulfillmentStatus === 'fulfilled' ? 'Not Delivered' : 'Delivered'}</a>
+                            }
+                        </div>
+                        <div className={'paymentData'}>
+                            <h4>{order.price.formattedTotalPrice}</h4>
+                            <img src={App.getAssetByStatus(order.billingInfo.status)}/>
+                        </div>
+                        <div className={'moreInfo'}>
+                            <ExpandingLabel order={order}/>
+                        </div>
+                    </div>
+                ))}
+            </div>
         )
     };
 
