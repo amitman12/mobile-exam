@@ -17,7 +17,7 @@ const api = createApiClient();
 
 export class ExpandingLabel extends React.Component<IProps, IState> {
     public constructor(props: IProps) {
-        super(props)
+        super(props);
         this.state = {
             displayedText: 'Show items',
             isClicked: false
