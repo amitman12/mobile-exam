@@ -83,13 +83,19 @@ body {
         text-align: end;
         width: 10%;
       }
-
+      .space{
+        display: inline-block;
+        vertical-align: top;
+        text-align: left;
+        width: 10%;
+      }
       .moreInfo {
         display: inline-block;
         vertical-align: top;
-        text-align: center;
-        width: 45%;
+        text-align: left;
+        width: 35%;
       }
+
     }
   }
 

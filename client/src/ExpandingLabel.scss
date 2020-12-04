@@ -63,25 +63,6 @@ body {
       &:hover {
         box-shadow: 0 2px 6px 1px #a5a5a5;
       }
-
-      .name {
-        padding-top: 6px;
-        display: inline-block;
-        width: 45%;
-      }
-
-      .image {
-        display: inline-block;
-        vertical-align: top;
-        width: 45%;
-      }
-
-      .price {
-        display: inline-block;
-        vertical-align: top;
-        text-align: end;
-        width: 10%;
-      }
     }
   }
 

@@ -63,11 +63,13 @@ export class ExpandingLabel extends React.Component<IProps, IState> {
     renderOrderLines = (items: OrderLine[]) => {
         return (
             <div className={'itemCard'}>
+                Exact order time: {this.props.order.createdDate}
                 {items.map((line) => (
                     <div>
-                        <div className={'image'}><img src={line.item.image} alt={''}/></div>
-                        <div className={'name'}>{line.item.name}</div>
-                        <div className={'price'}>{line.item.price}$</div>
+                        <div><img src={line.item.image} alt={''}/><h5>{line.item.name} {line.quantity} X {line.item.price}$</h5></div>
+                        {/*<div className={'name'}></div>*/}
+                        {/*<div className={'price'}>{line.quantity} X {line.item.price}$</div>*/}
+
                     </div>
                 ))}
             </div>

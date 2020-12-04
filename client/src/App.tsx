@@ -67,9 +67,11 @@ export class App extends React.PureComponent<{}, AppState> {
                             <h4>{order.price.formattedTotalPrice}</h4>
                             <img src={App.getAssetByStatus(order.billingInfo.status)}/>
                         </div>
+                        <div className={'space'}/>
                         <div className={'moreInfo'}>
                             <ExpandingLabel order={order}/>
                         </div>
+
                     </div>
                 ))}
             </div>
