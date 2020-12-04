@@ -81,9 +81,13 @@ app.post('/api/orders/:orderId/changeOrderDeliveryStatus', (req, res) => {
     }
     const order = allOrders[loc];
     order.fulfillmentStatus = deliveryStatus;
-    res.status(200).send();
+    res.sendStatus(200);
 })
 
+app.get('/api/orders/getOrderCount', (req, res) => {
+    const len = allOrders.length;
+    res.send({length: len});
+})
 
 app.listen(PORT);
 console.log('Listening on port', PORT);

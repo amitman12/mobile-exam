@@ -29,7 +29,7 @@ body {
     position: relative;
 
     input {
-      width: 980px;
+      width: 1000px;
       padding: 4px;
       text-overflow: ellipsis;
       display: inline-block;
@@ -49,6 +49,10 @@ body {
   .orders {
     margin: 0;
     padding: 0;
+    //overflow-y: scroll;
+    //scroll-behavior:smooth;
+    height:600px ;
+    width: 1050px;
 
     .orderCard {
       position: relative;
