@@ -28,7 +28,6 @@ export type Item = {
     price: number;
     image: string;
 }
-//line in ExpandingLabel..
 export type OrderLine = {
     item: Item;
     quantity: number;

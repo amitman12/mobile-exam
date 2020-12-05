@@ -78,12 +78,13 @@ export class App extends React.PureComponent<{}, AppState> {
         this.searchDebounce = setTimeout(async () => {
             this.setState({
                 search: value,
-                page:1
+                page:1,
+                orders: await api.getOrders(value, 1)
             });
         }, 300);
-        this.setState({
-            orders: await api.getOrders(value, 1)
-        })
+        // this.setState({
+        //     orders: await api.getOrders(value, 1)
+        // })
     };
 }
 

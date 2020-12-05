@@ -1,20 +1,29 @@
 import React, {Component} from 'react';
-import {createApiClient, Order} from './api';
-import {ExpandingLabel} from "./ExpandingLabel";
+import {createApiClient, Order, OrderLine} from './api';
+import {OrderItems} from "./OrderItems";
 
 
 interface Props {
-    order: Order
+    order: Order,
+}
+interface OrderComponentState{
+    order:Order,
+    displayingItems:boolean,
+    displayedText:string
 }
 
 const api = createApiClient();
 
-export class OrderComponent extends React.Component<Props> {
+export class OrderComponent extends React.Component<Props, OrderComponentState> {
     public constructor(props: Props) {
         super(props);
-        this.state = {
-            order: props.order
+        this.state= {
+            order: props.order,
+            displayingItems:false,
+            displayedText:'Show items'
         }
+        this.handleClicked = this.handleClicked.bind(this);
+        this.toggleClicked = this.toggleClicked.bind(this);
     }
 
     render() {
@@ -40,7 +49,8 @@ export class OrderComponent extends React.Component<Props> {
                 </div>
                 <div className={'space'}/>
                 <div className={'moreInfo'}>
-                    <ExpandingLabel order={order}/>
+                    <h4><a onClick={this.handleClicked}>{this.state.displayedText}</a></h4>
+                    {this.state.displayingItems&&<OrderItems order={order}/>}
                 </div>
             </div>
         )
@@ -54,7 +64,19 @@ export class OrderComponent extends React.Component<Props> {
             order: order
         })
     }
+    handleClicked() {
+        this.setState(this.toggleClicked);
+    }
 
+    toggleClicked(state: { displayingItems: boolean }) {
+        let newText = (state.displayingItems) ? 'Show items' : 'Hide items';
+        console.log(newText);
+        return {
+            order: this.state.order,
+            displayedText: newText,
+            displayingItems: !state.displayingItems,
+        };
+    }
     static getAssetByStatus(status: string) {
         switch (status) {
             case 'fulfilled':
