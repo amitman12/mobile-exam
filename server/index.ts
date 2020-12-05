@@ -18,9 +18,11 @@ app.use((_, res, next) => {
     next();
 });
 
-app.get('/api/orders/', (req, res) => {
+app.get('/api/orders', (req, res) => {
+    const searchText = <string>(req.query.searchText || '');
+    const relevantOrders = allOrders.filter(order => ( includesNameOrId(order, searchText)));
     const page = <number>(req.query.page || 1);
-    const orders: any[] = allOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    const orders: any[] = relevantOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     res.send(orders);
 });
 
@@ -38,6 +40,9 @@ app.get('/api/items/:itemId', (req, res) => {
 
 app.get('/api/orders/:orderId/getOrderLines', (req, res) => {
     const orderId = req.params.orderId;
+    if(orderId == '11634'){
+        console.log('i was here')
+    }
     const loc = allOrders.findIndex(order => order.id == orderId);
     if (loc === -1) {
         //assume order id is unique
@@ -91,4 +96,38 @@ app.get('/api/orders/getOrderCount', (req, res) => {
 
 app.listen(PORT);
 console.log('Listening on port', PORT);
+
+
+function includesNameOrId(order: any, searchText: string) {
+    if ((order.customer.name.toLowerCase() + order.id).includes(searchText.toLowerCase())) {
+        if(searchText=='Garcia'){
+            console.log(order);
+        }
+        return true;
+    }
+    return false;
+}
+
+function includesItem(order: any, searchText: string) {
+    //we scan the list of products for an order, to determine if an order has an item that contains the searchedText.
+    // another way of implementing this is scanning products and finding all items that contain the searchedText, and then simply asking if an order has one of these items.
+
+    let i = 0;
+    while (i < order.items.length) {
+        if (products[order.items[i].id].name.includes(searchText)) {
+            if(searchText!='') {
+                // console.log(order);
+                console.log(order.customer.name);
+                console.log(order.items[i]); // item that the customer ordered
+                console.log(products[order.items[i].id].name); //item name
+                console.log(searchText); // what was searched
+                console.log('-------------------');
+            }
+            return true;
+        }
+        i++;
+    }
+    return false;
+}
+
 

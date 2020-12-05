@@ -18,7 +18,7 @@ export class OrderComponent extends React.Component<Props> {
     }
 
     render() {
-        const order = this.props.order
+        const order = this.props.order;
         return (
             <div className={'orderCard'}>
                 <div className={'generalData'}>

@@ -1,7 +1,6 @@
 import React from 'react';
 import './App.scss';
 import {createApiClient, Order} from './api';
-import {ExpandingLabel} from "./ExpandingLabel";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {OrderComponent} from "./OrderComponent";
 
@@ -25,7 +24,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
     async componentDidMount() {
         this.setState({
-            orders: await api.getOrders(this.state.page)
+            orders: await api.getOrders(this.state.search, this.state.page)
         });
         this.setState({
             totalOrders: await api.getOrderCount()
@@ -56,8 +55,8 @@ export class App extends React.PureComponent<{}, AppState> {
             <div className='orders'>
                 <InfiniteScroll next={this.fetchMoreData} hasMore={true} loader={<h4>Loading Data...</h4>}
                                 dataLength={20 * this.state.page} height={600}>
-                    {filteredOrders.map((order) => (
-                        <OrderComponent order={order}/>
+                    {orders.map((order) => (
+                        <OrderComponent key={order.id} order={order}/>
                     ))}
                 </InfiniteScroll>
             </div>
@@ -68,19 +67,23 @@ export class App extends React.PureComponent<{}, AppState> {
         const newPage = this.state.page + 1;
         this.setState({
             page: newPage,
-            orders: this.state.orders?.concat(await api.getOrders(newPage)),
+            orders: this.state.orders?.concat(await api.getOrders(this.state.search, newPage)),
         });
         //app has more data when the user scrolls, since the array increases in size and is changed in memory.
         //make it so that less data is saved?
     }
 
-    onSearch = async (value: string, newPage?: number) => {
+    onSearch = async (value: string) => {
         clearTimeout(this.searchDebounce);
         this.searchDebounce = setTimeout(async () => {
             this.setState({
-                search: value
+                search: value,
+                page:1
             });
         }, 300);
+        this.setState({
+            orders: await api.getOrders(value, 1)
+        })
     };
 }
 

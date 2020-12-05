@@ -8,7 +8,7 @@ interface IProps {
 }
 
 interface IState {
-    displayedText: string
+    displayedText: string,
     isClicked: boolean,
     items?: OrderLine[]
 }
@@ -23,7 +23,6 @@ export class ExpandingLabel extends React.Component<IProps, IState> {
             isClicked: false
         }
 
-        this.setState = this.setState.bind(this);
         this.handleClicked = this.handleClicked.bind(this);
         this.toggleClicked = this.toggleClicked.bind(this);
     }
@@ -64,8 +63,8 @@ export class ExpandingLabel extends React.Component<IProps, IState> {
         return (
             <div className={'itemCard'}>
                 Exact order time: {this.props.order.createdDate}
-                {items.map((line) => (
-                    <div>
+                {items.map((line,index) => (
+                    <div key={index}>
                         <div><img src={line.item.image} alt={''}/><h5>{line.item.name} {line.quantity} X {line.item.price}$</h5></div>
                         {/*<div className={'name'}></div>*/}
                         {/*<div className={'price'}>{line.quantity} X {line.item.price}$</div>*/}
