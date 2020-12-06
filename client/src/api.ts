@@ -12,7 +12,10 @@ export type BillingInfo = {
 export type Price = {
     formattedTotalPrice: string;
 }
-
+export type WaitForOrderChangesResponse = {
+    changedOrders: Order[];
+    newSyncPoint: number;
+}
 export type Order = {
     id: number;
     createdDate: string;
@@ -40,6 +43,7 @@ export type ApiClient = {
     changeOrderDeliveryStatus: (orderId: number, deliveryStatus: string) => Promise<void>;
     getOrderLines: (orderId: number) => Promise<OrderLine[]>;
     getOrderCount: (searchText: string, deliveryFilter: string, paymentFilter: string) => Promise<number>;
+    listenToChanges: (syncPoint: number) => Promise<WaitForOrderChangesResponse>;
 }
 
 
@@ -69,11 +73,14 @@ export const createApiClient = (): ApiClient => {
         getOrderCount: (searchText: string, deliveryFilter: string, paymentFilter: string) => {
             return axios.get(`http://localhost:3232/api/orders/getOrderCount`, {
                 params: {
-                    searchText:searchText,
-                    deliveryFilter:deliveryFilter,
-                    paymentFilter:paymentFilter
+                    searchText: searchText,
+                    deliveryFilter: deliveryFilter,
+                    paymentFilter: paymentFilter
                 }
             }).then((res) => res.data.length)
+        },
+        listenToChanges: (syncPoint) => {
+            return axios.get('/api/listenToChanges').then((res) => res.data);
         }
     }
 }

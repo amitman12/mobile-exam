@@ -4,6 +4,8 @@ import {createApiClient, Order} from './api';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {OrderComponent} from "./OrderComponent";
 import {FormControl, FormLabel, RadioGroup, FormControlLabel, Radio} from '@material-ui/core'
+import {Simulate} from "react-dom/test-utils";
+import change = Simulate.change;
 
 
 export type AppState = {
@@ -11,8 +13,10 @@ export type AppState = {
     page: number,
     orders?: Order[],
     paymentStatusFilter: string,
-    deliveryStatusFilter: string
-    search: string;
+    deliveryStatusFilter: string,
+    search: string,
+    changedOrders?: Order[],
+    syncPoint: number
 }
 
 
@@ -24,17 +28,47 @@ export class App extends React.PureComponent<{}, AppState> {
         search: '',
         page: 1,
         deliveryStatusFilter: 'All',
-        paymentStatusFilter: 'All'
+        paymentStatusFilter: 'All',
+        syncPoint: 0
     };
     searchDebounce: any = null;
+
+    async initClient() {
+
+        while (true) {
+            //wait 20 seconds here??
+            if (this.state.orders) {
+                let waitForOrderChangesResponse = await api.listenToChanges(this.state.syncPoint);
+                let changedOrders = waitForOrderChangesResponse.changedOrders;
+                let newSyncPoint = waitForOrderChangesResponse.newSyncPoint;
+                let updatedOrders = this.state.orders;
+                let i = 0;
+                let j = 0;
+                while (i < changedOrders.length) {
+                    while (j < updatedOrders.length) {
+                        if (updatedOrders[j].id === changedOrders[i].id) {
+                            updatedOrders[j].fulfillmentStatus = (updatedOrders[j].fulfillmentStatus === 'fulfilled') ? 'not-fulfilled' : 'fulfilled;'
+                        }
+                        ++j;
+                    }
+                    ++i;
+                }
+                this.setState({
+                    syncPoint: newSyncPoint,
+                    orders: updatedOrders
+                })
+            }
+        }
+    }
 
     async componentDidMount() {
         this.setState({
             orders: await api.getOrders(this.state.search, this.state.page, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
         });
         this.setState({
-            totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
+            totalOrders: await api.getOrderCount(this.state.search, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
         });
+        await this.initClient();
     }
 
 
@@ -77,7 +111,8 @@ export class App extends React.PureComponent<{}, AppState> {
                 </div>
 
 
-                {orders ? <div className='results'>Showing {orders.length} / {this.state.totalOrders} results</div> : null}
+                {orders ?
+                    <div className='results'>Showing {orders.length} / {this.state.totalOrders} results</div> : null}
                 {orders ? this.renderOrders(orders) : <h2>Loading...</h2>}
 
             </main>
@@ -101,18 +136,18 @@ export class App extends React.PureComponent<{}, AppState> {
         const val = ev.target.value;
         this.setState({
             deliveryStatusFilter: val,
-            page:1,
-            orders:await api.getOrders(this.state.search,1,val,this.state.paymentStatusFilter),
-            totalOrders: await api.getOrderCount(this.state.search,val, this.state.paymentStatusFilter)
+            page: 1,
+            orders: await api.getOrders(this.state.search, 1, val, this.state.paymentStatusFilter),
+            totalOrders: await api.getOrderCount(this.state.search, val, this.state.paymentStatusFilter)
         });
     };
     handlePaymentStatusFilterChange = async (ev: any) => {
         const val = ev.target.value;
         this.setState({
             paymentStatusFilter: val,
-            page:1,
-            orders:await api.getOrders(this.state.search,1,this.state.deliveryStatusFilter,val),
-            totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, val)
+            page: 1,
+            orders: await api.getOrders(this.state.search, 1, this.state.deliveryStatusFilter, val),
+            totalOrders: await api.getOrderCount(this.state.search, this.state.deliveryStatusFilter, val)
         });
     };
 
@@ -133,7 +168,7 @@ export class App extends React.PureComponent<{}, AppState> {
                 search: value,
                 page: 1,
                 orders: await api.getOrders(value, 1, this.state.deliveryStatusFilter, this.state.paymentStatusFilter),
-                totalOrders: await api.getOrderCount(value,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
+                totalOrders: await api.getOrderCount(value, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
             });
         }, 300);
     };
