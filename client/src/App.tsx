@@ -50,7 +50,7 @@ export class App extends React.PureComponent<{}, AppState> {
                     <span>
                         <h5>
                         <FormControl component="fieldset">
-                            <FormLabel component="legend">Filter by delivery status:</FormLabel>
+                            <FormLabel component="legend"/>
                             <RadioGroup row aria-label="Delivery Status" name="Delivery Status"
                                         value={this.state.deliveryStatusFilter}
                                         onChange={(e) => this.handleDeliveryStatusFilterChange(e)}>
@@ -62,7 +62,7 @@ export class App extends React.PureComponent<{}, AppState> {
                         </h5>
                         <h5>
                         <FormControl component="fieldset">
-                            <FormLabel component="legend">Filter by payment status:</FormLabel>
+                            <FormLabel component="legend"/>
                             <RadioGroup row aria-label="Delivery Status" name="Delivery Status"
                                         value={this.state.paymentStatusFilter}
                                         onChange={(e) => this.handlePaymentStatusFilterChange(e)}>

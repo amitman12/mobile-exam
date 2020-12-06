@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import {createApiClient, Order, OrderLine} from './api';
+import React from 'react';
+import {createApiClient, Order} from './api';
 import {OrderItems} from "./OrderItems";
 
 
@@ -37,7 +37,7 @@ export class OrderComponent extends React.Component<Props, OrderComponentState> 
                 </div>
                 <div className={'fulfillmentData'}>
                     <h4>{order.itemQuantity} Items</h4>
-                    <img src={OrderComponent.getAssetByStatus(order.fulfillmentStatus)}/>
+                    <img alt={''} src={OrderComponent.getAssetByStatus(order.fulfillmentStatus)}/>
                     {order.fulfillmentStatus !== 'canceled' &&
                     <a onClick={() => this.handleChangeDeliveryStatus(order)}>Mark
                         as {order.fulfillmentStatus === 'fulfilled' ? 'Not Delivered' : 'Delivered'}</a>
@@ -45,7 +45,7 @@ export class OrderComponent extends React.Component<Props, OrderComponentState> 
                 </div>
                 <div className={'paymentData'}>
                     <h4>{order.price.formattedTotalPrice}</h4>
-                    <img src={OrderComponent.getAssetByStatus(order.billingInfo.status)}/>
+                    <img alt={''} src={OrderComponent.getAssetByStatus(order.billingInfo.status)}/>
                 </div>
                 <div className={'space'}/>
                 <div className={'moreInfo'}>

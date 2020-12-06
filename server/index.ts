@@ -108,10 +108,8 @@ console.log('Listening on port', PORT);
 
 
 function includesNameOrId(order: any, searchText: string) {
-    if ((order.customer.name.toLowerCase() + order.id).includes(searchText.toLowerCase())) {
-        return true;
-    }
-    return false;
+    return (order.customer.name.toLowerCase() + order.id).includes(searchText.toLowerCase());
+
 }
 
 function includesItem(order: any, searchText: string) {
@@ -135,18 +133,14 @@ function passFulfillmentStatusFilter(order: any, deliveryFilter: string) {
     if (deliveryFilter == 'All') {
         return true;
     }
-    if ((deliveryFilter == 'Delivered' && order.fulfillmentStatus == 'fulfilled') || (deliveryFilter == 'Not Delivered' && order.fulfillmentStatus == 'not-fulfilled')) {
-        return true;
-    }
-    return false;
+    return (deliveryFilter == 'Delivered' && order.fulfillmentStatus == 'fulfilled') || (deliveryFilter == 'Not Delivered' && order.fulfillmentStatus == 'not-fulfilled');
+
 }
 
 function passPaymentStatusFilter(order: any, paymentFilter: string) {
     if (paymentFilter == 'All') {
         return true;
     }
-    if ((paymentFilter == 'Paid' && order.billingInfo.status == 'paid') || (paymentFilter == 'Not Paid' && order.billingInfo.status == 'not-paid')) {
-        return true;
-    }
-    return false;
+    return (paymentFilter == 'Paid' && order.billingInfo.status == 'paid') || (paymentFilter == 'Not Paid' && order.billingInfo.status == 'not-paid');
+
 }
