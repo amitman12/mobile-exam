@@ -98,19 +98,21 @@ export class App extends React.PureComponent<{}, AppState> {
     };
 
     handleDeliveryStatusFilterChange = async (ev: any) => {
+        const val = ev.target.value;
         this.setState({
-            deliveryStatusFilter: ev.target.value,
+            deliveryStatusFilter: val,
             page:1,
-            orders:await api.getOrders(this.state.search,1,ev.target.value,this.state.paymentStatusFilter),
-            totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
+            orders:await api.getOrders(this.state.search,1,val,this.state.paymentStatusFilter),
+            totalOrders: await api.getOrderCount(this.state.search,val, this.state.paymentStatusFilter)
         });
     };
     handlePaymentStatusFilterChange = async (ev: any) => {
+        const val = ev.target.value;
         this.setState({
-            paymentStatusFilter: ev.target.value,
+            paymentStatusFilter: val,
             page:1,
-            orders:await api.getOrders(this.state.search,1,this.state.deliveryStatusFilter,ev.target.value),
-            totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
+            orders:await api.getOrders(this.state.search,1,this.state.deliveryStatusFilter,val),
+            totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, val)
         });
     };
 
@@ -131,7 +133,7 @@ export class App extends React.PureComponent<{}, AppState> {
                 search: value,
                 page: 1,
                 orders: await api.getOrders(value, 1, this.state.deliveryStatusFilter, this.state.paymentStatusFilter),
-                totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
+                totalOrders: await api.getOrderCount(value,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
             });
         }, 300);
     };

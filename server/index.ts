@@ -99,6 +99,7 @@ app.get('/api/orders/getOrderCount', (req, res) => {
     const relevantOrders = allOrders.filter(order => ((includesNameOrId(order, search) || includesItem(order, search)) &&
         (passFulfillmentStatusFilter(order, deliveryFilter)) && (passPaymentStatusFilter(order, paymentFilter))));
     const len = relevantOrders.length;
+    console.log(len);
     res.send({length: len});
 })
 
@@ -128,7 +129,7 @@ function includesItem(order: any, searchText: string) {
 }
 
 function passFulfillmentStatusFilter(order: any, deliveryFilter: string) {
-    if (deliveryFilter == 'Not Delivered') {
+    if (deliveryFilter == 'Delivered') {
         console.log('here');
     }
     if (deliveryFilter == 'All') {
