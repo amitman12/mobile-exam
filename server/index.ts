@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser = require('body-parser');
 
+
 const {products} = require('./products.json');
 
 const app = express();
@@ -20,7 +21,12 @@ app.use((_, res, next) => {
 
 app.get('/api/orders', (req, res) => {
     const searchText = <string>(req.query.searchText || '');
-    const relevantOrders = allOrders.filter(order => ( includesNameOrId(order, searchText)||includesItem(order,searchText)));
+    const deliveryFilter = <string>(req.query.deliveryFilter || '');
+    const paymentFilter = <string>(req.query.paymentFilter || '');
+    if(deliveryFilter== 'Not Delivered'){
+        console.log('p2');
+    }
+    const relevantOrders = allOrders.filter(order => ((includesNameOrId(order, searchText) || includesItem(order, searchText)) && (passFulfillmentStatusFilter(order, deliveryFilter)) && (passPaymentStatusFilter(order, paymentFilter))));
     const page = <number>(req.query.page || 1);
     const orders: any[] = relevantOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     res.send(orders);
@@ -40,7 +46,7 @@ app.get('/api/items/:itemId', (req, res) => {
 
 app.get('/api/orders/:orderId/getOrderLines', (req, res) => {
     const orderId = req.params.orderId;
-    if(orderId == '11634'){
+    if (orderId == '11634') {
     }
     const loc = allOrders.findIndex(order => order.id == orderId);
     if (loc === -1) {
@@ -118,4 +124,25 @@ function includesItem(order: any, searchText: string) {
     return false;
 }
 
+function passFulfillmentStatusFilter(order: any, deliveryFilter: string) {
+    if(deliveryFilter=='Not Delivered'){
+        console.log('here');
+    }
+    if (deliveryFilter == 'All') {
+        return true;
+    }
+    if ((deliveryFilter == 'Delivered' && order.fulfillmentStatus == 'fulfilled') || (deliveryFilter == 'Not Delivered' && order.fulfillmentStatus == 'not-fulfilled')) {
+        return true;
+    }
+    return false;
+}
 
+function passPaymentStatusFilter(order: any, paymentFilter: string) {
+    if (paymentFilter == 'All') {
+        return true;
+    }
+    if ((paymentFilter == 'Paid' && order.billingInfo.status == 'paid') || (paymentFilter == 'Not Paid' && order.billingInfo.status == 'not-paid')) {
+        return true;
+    }
+    return false;
+}

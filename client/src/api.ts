@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+
+
 export type Customer = {
     name: string;
 }
@@ -34,18 +36,25 @@ export type OrderLine = {
 }
 
 export type ApiClient = {
-    getOrders: (searchText: string, page: number) => Promise<Order[]>;
+    getOrders: (searchText: string, page: number, deliveryFilter: string, paymentFilter: string) => Promise<Order[]>;
     getItem: (itemId: string) => Promise<Item>;
     changeOrderDeliveryStatus: (orderId: number, deliveryStatus: string) => Promise<void>;
     getOrderLines: (orderId: number) => Promise<OrderLine[]>;
     getOrderCount: () => Promise<number>;
 }
 
+
 export const createApiClient = (): ApiClient => {
     return {
-        getOrders: (searchText: string, page: number) => {
-            console.log(1);
-            return axios.get(`http://localhost:3232/api/orders`, {params: {page:page,searchText: searchText}}).then((res) => res.data);
+        getOrders: (searchText: string, page: number, deliveryFilter: string, paymentFilter: string) => {
+            return axios.get(`http://localhost:3232/api/orders`, {
+                params: {
+                    page: page,
+                    searchText: searchText,
+                    deliveryFilter: deliveryFilter,
+                    paymentFilter:paymentFilter
+                }
+            }).then((res) => res.data);
         },
         getItem: (itemId: string) => {
             return axios.get(`http://localhost:3232/api/items/${itemId}`).then((res) => res.data);

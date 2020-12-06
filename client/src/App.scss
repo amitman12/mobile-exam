@@ -18,6 +18,23 @@ body {
     margin: 12px 5px;
   }
 
+  span {
+    width: 50px;
+    padding: 0px;
+    font-size: 2px;
+    display: inline;
+    text-overflow: ellipsis;
+    position: relative;
+    height: 20px;
+
+    h5 {
+      font-size: 1px;
+      margin-left: 100px;
+      text-align: center;
+      display: inline;
+    }
+  }
+
   header {
     width: 1000px;
     border-radius: 6px;
@@ -27,6 +44,7 @@ body {
     border: 1px solid #fff;
     padding: 10px 10px;
     position: relative;
+
 
     input {
       width: 1000px;
@@ -49,9 +67,7 @@ body {
   .orders {
     margin: 0;
     padding: 0;
-    //overflow-y: scroll;
-    //scroll-behavior:smooth;
-    height:600px ;
+    height: 570px;
     width: 1050px;
 
     .orderCard {
@@ -87,12 +103,14 @@ body {
         text-align: end;
         width: 10%;
       }
-      .space{
+
+      .space {
         display: inline-block;
         vertical-align: top;
         text-align: left;
         width: 10%;
       }
+
       .moreInfo {
         display: inline-block;
         vertical-align: top;
