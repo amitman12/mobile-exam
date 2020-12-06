@@ -23,10 +23,8 @@ app.get('/api/orders', (req, res) => {
     const searchText = <string>(req.query.searchText || '');
     const deliveryFilter = <string>(req.query.deliveryFilter || '');
     const paymentFilter = <string>(req.query.paymentFilter || '');
-    if(deliveryFilter== 'Not Delivered'){
-        console.log('p2');
-    }
-    const relevantOrders = allOrders.filter(order => ((includesNameOrId(order, searchText) || includesItem(order, searchText)) && (passFulfillmentStatusFilter(order, deliveryFilter)) && (passPaymentStatusFilter(order, paymentFilter))));
+    const relevantOrders = allOrders.filter(order => ((includesNameOrId(order, searchText) || includesItem(order, searchText)) &&
+        (passFulfillmentStatusFilter(order, deliveryFilter)) && (passPaymentStatusFilter(order, paymentFilter))));
     const page = <number>(req.query.page || 1);
     const orders: any[] = relevantOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     res.send(orders);
@@ -95,7 +93,12 @@ app.post('/api/orders/:orderId/changeOrderDeliveryStatus', (req, res) => {
 })
 
 app.get('/api/orders/getOrderCount', (req, res) => {
-    const len = allOrders.length;
+    const search = <string>(req.query.searchText || '');
+    const deliveryFilter = <string>(req.query.deliveryFilter || '');
+    const paymentFilter = <string>(req.query.paymentFilter || '');
+    const relevantOrders = allOrders.filter(order => ((includesNameOrId(order, search) || includesItem(order, search)) &&
+        (passFulfillmentStatusFilter(order, deliveryFilter)) && (passPaymentStatusFilter(order, paymentFilter))));
+    const len = relevantOrders.length;
     res.send({length: len});
 })
 
@@ -125,7 +128,7 @@ function includesItem(order: any, searchText: string) {
 }
 
 function passFulfillmentStatusFilter(order: any, deliveryFilter: string) {
-    if(deliveryFilter=='Not Delivered'){
+    if (deliveryFilter == 'Not Delivered') {
         console.log('here');
     }
     if (deliveryFilter == 'All') {

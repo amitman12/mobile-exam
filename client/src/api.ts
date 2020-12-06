@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 
-
 export type Customer = {
     name: string;
 }
@@ -40,7 +39,7 @@ export type ApiClient = {
     getItem: (itemId: string) => Promise<Item>;
     changeOrderDeliveryStatus: (orderId: number, deliveryStatus: string) => Promise<void>;
     getOrderLines: (orderId: number) => Promise<OrderLine[]>;
-    getOrderCount: () => Promise<number>;
+    getOrderCount: (searchText: string, deliveryFilter: string, paymentFilter: string) => Promise<number>;
 }
 
 
@@ -52,7 +51,7 @@ export const createApiClient = (): ApiClient => {
                     page: page,
                     searchText: searchText,
                     deliveryFilter: deliveryFilter,
-                    paymentFilter:paymentFilter
+                    paymentFilter: paymentFilter
                 }
             }).then((res) => res.data);
         },
@@ -67,8 +66,14 @@ export const createApiClient = (): ApiClient => {
         getOrderLines: (orderId: number) => {
             return axios.get(`http://localhost:3232/api/orders/${orderId}/getOrderLines`).then((res) => res.data);
         },
-        getOrderCount: () => {
-            return axios.get(`http://localhost:3232/api/orders/getOrderCount`).then((res) => res.data.length)
+        getOrderCount: (searchText: string, deliveryFilter: string, paymentFilter: string) => {
+            return axios.get(`http://localhost:3232/api/orders/getOrderCount`, {
+                params: {
+                    searchText:searchText,
+                    deliveryFilter:deliveryFilter,
+                    paymentFilter:paymentFilter
+                }
+            }).then((res) => res.data.length)
         }
     }
 }

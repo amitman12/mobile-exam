@@ -33,7 +33,7 @@ export class App extends React.PureComponent<{}, AppState> {
             orders: await api.getOrders(this.state.search, this.state.page, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
         });
         this.setState({
-            totalOrders: await api.getOrderCount()
+            totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
         });
     }
 
@@ -77,7 +77,7 @@ export class App extends React.PureComponent<{}, AppState> {
                 </div>
 
 
-                {orders ? <div className='results'>Showing {orders.length} results</div> : null}
+                {orders ? <div className='results'>Showing {orders.length} / {this.state.totalOrders} results</div> : null}
                 {orders ? this.renderOrders(orders) : <h2>Loading...</h2>}
 
             </main>
@@ -101,14 +101,16 @@ export class App extends React.PureComponent<{}, AppState> {
         this.setState({
             deliveryStatusFilter: ev.target.value,
             page:1,
-            orders:await api.getOrders(this.state.search,1,ev.target.value,this.state.paymentStatusFilter)
+            orders:await api.getOrders(this.state.search,1,ev.target.value,this.state.paymentStatusFilter),
+            totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
         });
     };
     handlePaymentStatusFilterChange = async (ev: any) => {
         this.setState({
             paymentStatusFilter: ev.target.value,
             page:1,
-            orders:await api.getOrders(this.state.search,1,this.state.deliveryStatusFilter,ev.target.value)
+            orders:await api.getOrders(this.state.search,1,this.state.deliveryStatusFilter,ev.target.value),
+            totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
         });
     };
 
@@ -128,7 +130,8 @@ export class App extends React.PureComponent<{}, AppState> {
             this.setState({
                 search: value,
                 page: 1,
-                orders: await api.getOrders(value, 1, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
+                orders: await api.getOrders(value, 1, this.state.deliveryStatusFilter, this.state.paymentStatusFilter),
+                totalOrders: await api.getOrderCount(this.state.search,this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
             });
         }, 300);
     };
