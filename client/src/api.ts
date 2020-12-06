@@ -14,7 +14,7 @@ export type Price = {
 }
 export type WaitForOrderChangesResponse = {
     changedOrders: Order[];
-    newSyncPoint: number;
+    syncPoint: number;
 }
 export type Order = {
     id: number;
@@ -80,7 +80,11 @@ export const createApiClient = (): ApiClient => {
             }).then((res) => res.data.length)
         },
         listenToChanges: (syncPoint) => {
-            return axios.get('/api/listenToChanges').then((res) => res.data);
+            return axios.get(`http://localhost:3232/api/listenToChanges`, {
+                params: {
+                    syncPoint: syncPoint
+                }
+            }).then((res) => res.data);
         }
     }
 }

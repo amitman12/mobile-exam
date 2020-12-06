@@ -4,8 +4,6 @@ import {createApiClient, Order} from './api';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {OrderComponent} from "./OrderComponent";
 import {FormControl, FormLabel, RadioGroup, FormControlLabel, Radio} from '@material-ui/core'
-import {Simulate} from "react-dom/test-utils";
-import change = Simulate.change;
 
 
 export type AppState = {
@@ -32,31 +30,35 @@ export class App extends React.PureComponent<{}, AppState> {
         syncPoint: 0
     };
     searchDebounce: any = null;
+    started: boolean = false;
 
     async initClient() {
 
+        let syncPoint: number = 0;
         while (true) {
-            //wait 20 seconds here??
-            if (this.state.orders) {
-                let waitForOrderChangesResponse = await api.listenToChanges(this.state.syncPoint);
+            if (!this.state.orders) {
+                //sleep 2 seconds here.
+            } else {
+                let waitForOrderChangesResponse = await api.listenToChanges(syncPoint);
                 let changedOrders = waitForOrderChangesResponse.changedOrders;
-                let newSyncPoint = waitForOrderChangesResponse.newSyncPoint;
-                let updatedOrders = this.state.orders;
+                syncPoint = waitForOrderChangesResponse.syncPoint;
+                let updatedOrders = [...this.state.orders];
                 let i = 0;
-                let j = 0;
                 while (i < changedOrders.length) {
+                    let j = 0;
                     while (j < updatedOrders.length) {
                         if (updatedOrders[j].id === changedOrders[i].id) {
-                            updatedOrders[j].fulfillmentStatus = (updatedOrders[j].fulfillmentStatus === 'fulfilled') ? 'not-fulfilled' : 'fulfilled;'
+                            console.log("handled");
+                            updatedOrders[j].fulfillmentStatus = changedOrders[i].fulfillmentStatus;
                         }
                         ++j;
                     }
                     ++i;
                 }
+                console.log(updatedOrders);
                 this.setState({
-                    syncPoint: newSyncPoint,
                     orders: updatedOrders
-                })
+                });
             }
         }
     }
@@ -68,7 +70,10 @@ export class App extends React.PureComponent<{}, AppState> {
         this.setState({
             totalOrders: await api.getOrderCount(this.state.search, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
         });
-        await this.initClient();
+        if (!this.started) {
+            this.started = true;
+            this.initClient();
+        }
     }
 
 

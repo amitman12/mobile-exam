@@ -153,6 +153,7 @@ function passPaymentStatusFilter(order: any, paymentFilter: string) {
 function notifyOrderChanged(orderId: string) {
     ++lastSyncPoint;
     changedOrdersMap[orderId] = lastSyncPoint;
+    console.log(`changedOrdersMap: ${JSON.stringify(changedOrdersMap)}`);
     for (let resolveFunction of listeners) {
         //let all listeners know of the change
         resolveFunction();
@@ -161,37 +162,50 @@ function notifyOrderChanged(orderId: string) {
     listeners = [];
 }
 
-async function listenToChanges(timeoutInMS:number) {
+async function listenToChanges(timeoutInMS:number):Promise<boolean> {
     let promise = new Promise((resolve,reject) =>{
         let timer:any;
         const resolveFunction = () => {
+            console.log(`resolved ${lastSyncPoint}`);
             clearTimeout(timer);
             resolve("finished");
             //resolve promise
         };
-        listeners.push(resolveFunction());
+        listeners.push(resolveFunction);
 
         timer = setTimeout(() => {
             listeners = listeners.filter(func => func!= resolveFunction);
+            console.log(`timed out ${lastSyncPoint}`);
             reject('timed out');
             //reject promise
         }, timeoutInMS);
     });
-    await promise;
+    console.log('before await');
+    try {
+        await promise;
+        console.log('after await');
+        return true;
+    } catch (e) {
+        console.log(`rejected. error${e}`);
+        return false;
+    }
 }
 
 
 app.get('/api/listenToChanges', async(req, res) => {
-    const syncPoint = <number>(req.query.syncPoint || 0);
+    const syncPoint: number = (req.query.syncPoint) ? parseInt(`${req.query.syncPoint}`) : 0;
+    console.log(`listen to changes syncPoint:${syncPoint}, lastSyncPoint:${lastSyncPoint}`);
     if (syncPoint === lastSyncPoint) {
+        console.log("equal");
         await listenToChanges(30000);
+        console.log(`listen to changes done`);
     }
     let changedOrders: any[] = [];
-    for(let orderId in Object.keys(changedOrdersMap)){
+    for(let orderId of Object.keys(changedOrdersMap)) {
         let orderLastSyncPoint = changedOrdersMap[orderId];
-        if(syncPoint<lastSyncPoint){
+        if(syncPoint<orderLastSyncPoint){
             //TODO can be done in O(1) if we use orders.json?
-            changedOrders.push(allOrders.filter((order) => order.id == orderId));
+            changedOrders.push(...allOrders.filter((order) => order.id == orderId));
         }
     }
     res.send({
