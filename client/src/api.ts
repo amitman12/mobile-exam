@@ -15,6 +15,7 @@ export type Price = {
 export type WaitForOrderChangesResponse = {
     changedOrders: Order[];
     syncPoint: number;
+    notDeliveredCount:number;
 }
 export type Order = {
     id: number;

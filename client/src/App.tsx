@@ -14,7 +14,8 @@ export type AppState = {
     deliveryStatusFilter: string,
     search: string,
     changedOrders?: Order[],
-    syncPoint: number
+    syncPoint: number,
+    totalNotDeliveredOrders?:number
 }
 
 
@@ -32,33 +33,38 @@ export class App extends React.PureComponent<{}, AppState> {
     searchDebounce: any = null;
     started: boolean = false;
 
-    async initClient() {
 
+    wait(ms:number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    async initClient() {
         let syncPoint: number = 0;
         while (true) {
             if (!this.state.orders) {
-                //sleep 2 seconds here.
-            } else {
-                let waitForOrderChangesResponse = await api.listenToChanges(syncPoint);
-                let changedOrders = waitForOrderChangesResponse.changedOrders;
-                syncPoint = waitForOrderChangesResponse.syncPoint;
-                let updatedOrders = [...this.state.orders];
-                let i = 0;
-                while (i < changedOrders.length) {
-                    let j = 0;
-                    while (j < updatedOrders.length) {
-                        if (updatedOrders[j].id === changedOrders[i].id) {
-                            console.log("handled");
-                            updatedOrders[j].fulfillmentStatus = changedOrders[i].fulfillmentStatus;
-                        }
-                        ++j;
-                    }
-                    ++i;
-                }
-                console.log(updatedOrders);
-                this.setState({
-                    orders: updatedOrders
-                });
+                await this.wait(2000);
+            }
+             else {
+                 try {
+                     let waitForOrderChangesResponse = await api.listenToChanges(syncPoint);
+                     let changedOrders = waitForOrderChangesResponse.changedOrders;
+                     let notDeliveredCount = waitForOrderChangesResponse.notDeliveredCount;
+                     syncPoint = waitForOrderChangesResponse.syncPoint;
+                     let newOrdersArray = [...this.state.orders];
+                     for(let order of changedOrders){
+                         for( let newOrder of newOrdersArray){
+                             if(newOrder.id===order.id){
+                                 newOrder.fulfillmentStatus = order.fulfillmentStatus;
+                             }
+                         }
+                     }
+                     this.setState({
+                         orders: newOrdersArray,
+                         totalNotDeliveredOrders:notDeliveredCount
+                     });
+                 } catch(err){
+                     console.log(err)
+                     await this.wait(2000);
+                 }
             }
         }
     }
@@ -68,11 +74,12 @@ export class App extends React.PureComponent<{}, AppState> {
             orders: await api.getOrders(this.state.search, this.state.page, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
         });
         this.setState({
-            totalOrders: await api.getOrderCount(this.state.search, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
+            totalOrders: await api.getOrderCount(this.state.search, this.state.deliveryStatusFilter, this.state.paymentStatusFilter),
+            totalNotDeliveredOrders:  await api.getOrderCount('','Not Delivered','All')
         });
         if (!this.started) {
             this.started = true;
-            this.initClient();
+            this.initClient(); // no await
         }
     }
 
@@ -117,7 +124,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
 
                 {orders ?
-                    <div className='results'>Showing {orders.length} / {this.state.totalOrders} results</div> : null}
+                    <div className='results'>Showing {orders.length} / {this.state.totalOrders} results. ({this.state.totalNotDeliveredOrders} not delivered)</div> : null}
                 {orders ? this.renderOrders(orders) : <h2>Loading...</h2>}
 
             </main>

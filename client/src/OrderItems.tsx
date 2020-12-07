@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import {createApiClient, Order, Item, OrderLine} from './api';
+import React from 'react';
+import {createApiClient, Order, OrderLine} from './api';
 import './OrderItems.scss';
 
 

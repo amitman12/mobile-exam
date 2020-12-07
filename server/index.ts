@@ -10,6 +10,7 @@ const PAGE_SIZE = 20;
 
 let lastSyncPoint = 1;
 let listeners: any[] = [];
+let notDeliveredCount = checkNotDeliveredOrdersCount();
 const changedOrdersMap: { [key: string]: number; } = {};
 
 
@@ -92,6 +93,12 @@ app.post('/api/orders/:orderId/changeOrderDeliveryStatus', (req, res) => {
     }
     const order = allOrders[loc];
     order.fulfillmentStatus = deliveryStatus;
+    if(deliveryStatus=='not-fulfilled'){
+        notDeliveredCount++;
+    }
+    else{
+        notDeliveredCount--;
+    }
     notifyOrderChanged(orderId);
     res.sendStatus(200);
 })
@@ -103,7 +110,6 @@ app.get('/api/orders/getOrderCount', (req, res) => {
     const relevantOrders = allOrders.filter(order => ((includesNameOrId(order, search) || includesItem(order, search)) &&
         (passFulfillmentStatusFilter(order, deliveryFilter)) && (passPaymentStatusFilter(order, paymentFilter))));
     const len = relevantOrders.length;
-    console.log(len);
     res.send({length: len});
 })
 
@@ -131,9 +137,6 @@ function includesItem(order: any, searchText: string) {
 }
 
 function passFulfillmentStatusFilter(order: any, deliveryFilter: string) {
-    if (deliveryFilter == 'Delivered') {
-        console.log('here');
-    }
     if (deliveryFilter == 'All') {
         return true;
     }
@@ -153,7 +156,6 @@ function passPaymentStatusFilter(order: any, paymentFilter: string) {
 function notifyOrderChanged(orderId: string) {
     ++lastSyncPoint;
     changedOrdersMap[orderId] = lastSyncPoint;
-    console.log(`changedOrdersMap: ${JSON.stringify(changedOrdersMap)}`);
     for (let resolveFunction of listeners) {
         //let all listeners know of the change
         resolveFunction();
@@ -180,10 +182,8 @@ async function listenToChanges(timeoutInMS:number):Promise<boolean> {
             //reject promise
         }, timeoutInMS);
     });
-    console.log('before await');
     try {
         await promise;
-        console.log('after await');
         return true;
     } catch (e) {
         console.log(`rejected. error${e}`);
@@ -191,14 +191,21 @@ async function listenToChanges(timeoutInMS:number):Promise<boolean> {
     }
 }
 
+function checkNotDeliveredOrdersCount(){
+    let count = 0;
+    for(let order of allOrders){
+        if(order.fulfillmentStatus=='not-fulfilled'){
+            ++count;
+        }
+    }
+    return count;
+}
 
 app.get('/api/listenToChanges', async(req, res) => {
     const syncPoint: number = (req.query.syncPoint) ? parseInt(`${req.query.syncPoint}`) : 0;
     console.log(`listen to changes syncPoint:${syncPoint}, lastSyncPoint:${lastSyncPoint}`);
     if (syncPoint === lastSyncPoint) {
-        console.log("equal");
         await listenToChanges(30000);
-        console.log(`listen to changes done`);
     }
     let changedOrders: any[] = [];
     for(let orderId of Object.keys(changedOrdersMap)) {
@@ -210,6 +217,7 @@ app.get('/api/listenToChanges', async(req, res) => {
     }
     res.send({
         changedOrders:changedOrders,
-        syncPoint:lastSyncPoint
+        syncPoint:lastSyncPoint,
+        notDeliveredCount:notDeliveredCount
     })
 })

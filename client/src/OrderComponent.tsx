@@ -70,7 +70,6 @@ export class OrderComponent extends React.Component<Props, OrderComponentState> 
 
     toggleClicked(state: { displayingItems: boolean }) {
         let newText = (state.displayingItems) ? 'Show items' : 'Hide items';
-        console.log(newText);
         return {
             order: this.state.order,
             displayedText: newText,
