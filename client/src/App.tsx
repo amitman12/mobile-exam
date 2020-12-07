@@ -9,7 +9,7 @@ import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 const theme = createMuiTheme({
     palette: {
         secondary: {main: '#d71111'},
-        primary: {main: '#16be1e'},
+        primary: {main: '#12e91c'},
     },
 });
 
@@ -136,12 +136,14 @@ export class App extends React.PureComponent<{}, AppState> {
                         </MuiThemeProvider>
                 </span>
                 </div>
-
+                <div></div>
 
                 {
                     orders ?
-                        <div className='results'>Showing {orders.length} / {this.state.totalOrders} results
-                            ({this.state.totalNotDeliveredOrders} not delivered)</div> : null
+                        <div className='results'>
+                            <div className='searchResults'>Showing {orders.length} / {this.state.totalOrders} results </div>
+                            <div className='totalNotDelivered'>(total not delivered: {this.state.totalNotDeliveredOrders})</div>
+                        </div> : null
                 }
                 {
                     orders ? this.renderOrders(orders) : <h2>Loading...</h2>

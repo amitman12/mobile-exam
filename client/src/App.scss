@@ -12,10 +12,19 @@ body {
     font-weight: 300;
   }
 
-  .results {
+  .results{
+    justify-content: space-between;
+
+  }
+  .searchResults {
     color: #7a92a5;
     font-size: 14px;
     margin: 12px 5px;
+    display: inline;
+
+  }
+  .totalNotDelivered{
+    float: right;
   }
 
   span {
