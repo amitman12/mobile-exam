@@ -3,13 +3,13 @@ import './App.scss';
 import {createApiClient, Order} from './api';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {OrderComponent} from "./OrderComponent";
-import {FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Typography, Box} from '@material-ui/core'
+import {FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Box} from '@material-ui/core'
 import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
     palette: {
-        secondary: {main: '#d71111'}, // Purple and green play nicely together.
-        primary: {main: '#12e91c'}, // This is just green.A700 as hex.
+        secondary: {main: '#d71111'},
+        primary: {main: '#16be1e'},
     },
 });
 
@@ -114,8 +114,7 @@ export class App extends React.PureComponent<{}, AppState> {
                                 <FormControlLabel value="Delivered" control={<Radio color={"primary"}/>}
                                                   label={<Box component="div" fontSize={14}>Delivered</Box>}/>
                                 <FormControlLabel value="Not Delivered" control={<Radio color={"secondary"}/>}
-                                                  label={<Box component="div" fontSize={14}>Not Delivered
-                                                      ({this.state.totalNotDeliveredOrders})</Box>}/>
+                                                  label={<Box component="div" fontSize={14}>Not Delivered</Box>}/>
                             </RadioGroup>
                         </FormControl>
                         </h5>
