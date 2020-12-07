@@ -3,8 +3,15 @@ import './App.scss';
 import {createApiClient, Order} from './api';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {OrderComponent} from "./OrderComponent";
-import {FormControl, FormLabel, RadioGroup, FormControlLabel, Radio} from '@material-ui/core'
+import {FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Typography, Box} from '@material-ui/core'
+import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 
+const theme = createMuiTheme({
+    palette: {
+        secondary: {main: '#d71111'}, // Purple and green play nicely together.
+        primary: {main: '#12e91c'}, // This is just green.A700 as hex.
+    },
+});
 
 export type AppState = {
     totalOrders?: number,
@@ -15,7 +22,7 @@ export type AppState = {
     search: string,
     changedOrders?: Order[],
     syncPoint: number,
-    totalNotDeliveredOrders?:number
+    totalNotDeliveredOrders?: number
 }
 
 
@@ -34,37 +41,37 @@ export class App extends React.PureComponent<{}, AppState> {
     started: boolean = false;
 
 
-    wait(ms:number) {
+    wait(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
+
     async initClient() {
         let syncPoint: number = 0;
         while (true) {
             if (!this.state.orders) {
                 await this.wait(2000);
-            }
-             else {
-                 try {
-                     let waitForOrderChangesResponse = await api.listenToChanges(syncPoint);
-                     let changedOrders = waitForOrderChangesResponse.changedOrders;
-                     let notDeliveredCount = waitForOrderChangesResponse.notDeliveredCount;
-                     syncPoint = waitForOrderChangesResponse.syncPoint;
-                     let newOrdersArray = [...this.state.orders];
-                     for(let order of changedOrders){
-                         for( let newOrder of newOrdersArray){
-                             if(newOrder.id===order.id){
-                                 newOrder.fulfillmentStatus = order.fulfillmentStatus;
-                             }
-                         }
-                     }
-                     this.setState({
-                         orders: newOrdersArray,
-                         totalNotDeliveredOrders:notDeliveredCount
-                     });
-                 } catch(err){
-                     console.log(err)
-                     await this.wait(2000);
-                 }
+            } else {
+                try {
+                    let waitForOrderChangesResponse = await api.listenToChanges(syncPoint);
+                    let changedOrders = waitForOrderChangesResponse.changedOrders;
+                    let notDeliveredCount = waitForOrderChangesResponse.notDeliveredCount;
+                    syncPoint = waitForOrderChangesResponse.syncPoint;
+                    let newOrdersArray = [...this.state.orders];
+                    for (let order of changedOrders) {
+                        for (let newOrder of newOrdersArray) {
+                            if (newOrder.id === order.id) {
+                                newOrder.fulfillmentStatus = order.fulfillmentStatus;
+                            }
+                        }
+                    }
+                    this.setState({
+                        orders: newOrdersArray,
+                        totalNotDeliveredOrders: notDeliveredCount
+                    });
+                } catch (err) {
+                    console.log(err)
+                    await this.wait(2000);
+                }
             }
         }
     }
@@ -75,7 +82,7 @@ export class App extends React.PureComponent<{}, AppState> {
         });
         this.setState({
             totalOrders: await api.getOrderCount(this.state.search, this.state.deliveryStatusFilter, this.state.paymentStatusFilter),
-            totalNotDeliveredOrders:  await api.getOrderCount('','Not Delivered','All')
+            totalNotDeliveredOrders: await api.getOrderCount('', 'Not Delivered', 'All')
         });
         if (!this.started) {
             this.started = true;
@@ -92,17 +99,23 @@ export class App extends React.PureComponent<{}, AppState> {
                 <header>
                     <input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)}/>
                 </header>
+
                 <div>
                     <span>
+                        <MuiThemeProvider theme={theme}>
                         <h5>
                         <FormControl component="fieldset">
                             <FormLabel component="legend"/>
                             <RadioGroup row aria-label="Delivery Status" name="Delivery Status"
                                         value={this.state.deliveryStatusFilter}
                                         onChange={(e) => this.handleDeliveryStatusFilterChange(e)}>
-                                <FormControlLabel value="All" control={<Radio/>} label="All"/>
-                                <FormControlLabel value="Delivered" control={<Radio/>} label="Delivered"/>
-                                <FormControlLabel value="Not Delivered" control={<Radio/>} label="Not Delivered"/>
+                                <FormControlLabel value="All" control={<Radio color={"primary"}/>}
+                                                  label={<Box component="div" fontSize={14}>All</Box>}/>
+                                <FormControlLabel value="Delivered" control={<Radio color={"primary"}/>}
+                                                  label={<Box component="div" fontSize={14}>Delivered</Box>}/>
+                                <FormControlLabel value="Not Delivered" control={<Radio color={"secondary"}/>}
+                                                  label={<Box component="div" fontSize={14}>Not Delivered
+                                                      ({this.state.totalNotDeliveredOrders})</Box>}/>
                             </RadioGroup>
                         </FormControl>
                         </h5>
@@ -112,20 +125,28 @@ export class App extends React.PureComponent<{}, AppState> {
                             <RadioGroup row aria-label="Delivery Status" name="Delivery Status"
                                         value={this.state.paymentStatusFilter}
                                         onChange={(e) => this.handlePaymentStatusFilterChange(e)}>
-                                <FormControlLabel value="All" control={<Radio/>}
-                                                  label="All"/>
-                                <FormControlLabel value="Paid" control={<Radio/>} label="Paid"/>
-                                <FormControlLabel value="Not Paid" control={<Radio/>} label="Not Paid"/>
+                                <FormControlLabel value="All" control={<Radio color={"primary"}/>}
+                                                  label={<Box component="div" fontSize={14}>All</Box>}/>
+                                <FormControlLabel value="Paid" control={<Radio color={"primary"}/>}
+                                                  label={<Box component="div" fontSize={14}>Paid</Box>}/>
+                                <FormControlLabel value="Not Paid" control={<Radio color={"secondary"}/>}
+                                                  label={<Box component="div" fontSize={14}>Not Paid</Box>}/>
                             </RadioGroup>
                         </FormControl>
                             </h5>
-                    </span>
+                        </MuiThemeProvider>
+                </span>
                 </div>
 
 
-                {orders ?
-                    <div className='results'>Showing {orders.length} / {this.state.totalOrders} results. ({this.state.totalNotDeliveredOrders} not delivered)</div> : null}
-                {orders ? this.renderOrders(orders) : <h2>Loading...</h2>}
+                {
+                    orders ?
+                        <div className='results'>Showing {orders.length} / {this.state.totalOrders} results
+                            ({this.state.totalNotDeliveredOrders} not delivered)</div> : null
+                }
+                {
+                    orders ? this.renderOrders(orders) : <h2>Loading...</h2>
+                }
 
             </main>
         )
