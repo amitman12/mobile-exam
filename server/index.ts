@@ -168,7 +168,7 @@ async function listenToChanges(timeoutInMS:number):Promise<boolean> {
     let promise = new Promise((resolve,reject) =>{
         let timer:any;
         const resolveFunction = () => {
-            console.log(`resolved ${lastSyncPoint}`);
+            // console.log(`resolved ${lastSyncPoint}`);
             clearTimeout(timer);
             resolve("finished");
             //resolve promise
@@ -177,7 +177,7 @@ async function listenToChanges(timeoutInMS:number):Promise<boolean> {
 
         timer = setTimeout(() => {
             listeners = listeners.filter(func => func!= resolveFunction);
-            console.log(`timed out ${lastSyncPoint}`);
+            // console.log(`timed out ${lastSyncPoint}`);
             reject('timed out');
             //reject promise
         }, timeoutInMS);

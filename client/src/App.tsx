@@ -156,7 +156,7 @@ export class App extends React.PureComponent<{}, AppState> {
     renderOrders = (orders: Order[]) => {
         return (
             <div className='orders'>
-                <InfiniteScroll next={this.fetchMoreData} hasMore={true} loader={<h4>Loading Data...</h4>}
+                <InfiniteScroll next={this.fetchMoreData} hasMore={true} loader={<h4>{(this.state.totalOrders)?'Loading Data..':''}</h4>}
                                 dataLength={20 * this.state.page} height={600}>
                     {orders.map((order) => (
                         <OrderComponent key={order.id} order={order}/>
