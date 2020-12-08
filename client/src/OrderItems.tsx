@@ -46,9 +46,6 @@ export class OrderItems extends React.Component<IProps, IState> {
                     <div key={index}>
                         <div><img src={line.item.image} alt={''}/>
                             <h5>{line.item.name} {line.quantity} X {line.item.price}$</h5></div>
-                        {/*<div className={'name'}></div>*/}
-                        {/*<div className={'price'}>{line.quantity} X {line.item.price}$</div>*/}
-
                     </div>
                 ))}
             </div>

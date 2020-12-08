@@ -78,15 +78,13 @@ export class App extends React.PureComponent<{}, AppState> {
 
     async componentDidMount() {
         this.setState({
-            orders: await api.getOrders(this.state.search, this.state.page, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
-        });
-        this.setState({
+            orders: await api.getOrders(this.state.search, this.state.page, this.state.deliveryStatusFilter, this.state.paymentStatusFilter),
             totalOrders: await api.getOrderCount(this.state.search, this.state.deliveryStatusFilter, this.state.paymentStatusFilter),
             totalNotDeliveredOrders: await api.getOrderCount('', 'Not Delivered', 'All')
         });
         if (!this.started) {
             this.started = true;
-            this.initClient(); // no await
+            this.initClient();
         }
     }
 
@@ -137,18 +135,13 @@ export class App extends React.PureComponent<{}, AppState> {
                 </span>
                 </div>
                 <div></div>
-
-                {
-                    orders ?
-                        <div className='results'>
-                            <div className='searchResults'>Showing {orders.length} / {this.state.totalOrders} results </div>
-                            <div className='totalNotDelivered'>(total not delivered: {this.state.totalNotDeliveredOrders})</div>
-                        </div> : null
-                }
-                {
-                    orders ? this.renderOrders(orders) : <h2>Loading...</h2>
-                }
-
+                {orders ?
+                    <div className='results'>
+                        <div className='searchResults'>Showing {orders.length} / {this.state.totalOrders} results</div>
+                        <div className='totalNotDelivered'>(total not delivered: {this.state.totalNotDeliveredOrders})
+                        </div>
+                    </div> : null}
+                {orders ? this.renderOrders(orders) : <h2>Loading...</h2>}
             </main>
         )
     }
@@ -156,7 +149,8 @@ export class App extends React.PureComponent<{}, AppState> {
     renderOrders = (orders: Order[]) => {
         return (
             <div className='orders'>
-                <InfiniteScroll next={this.fetchMoreData} hasMore={true} loader={<h4>{(this.state.totalOrders)?'Loading Data..':''}</h4>}
+                <InfiniteScroll  initialScrollY={0} next={this.fetchMoreData} hasMore={true}
+                                loader={<h4>{(this.state.totalOrders) ? 'Loading Data..' : ''}</h4>}
                                 dataLength={20 * this.state.page} height={600}>
                     {orders.map((order) => (
                         <OrderComponent key={order.id} order={order}/>

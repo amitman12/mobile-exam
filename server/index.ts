@@ -48,7 +48,7 @@ app.get('/api/items/:itemId', (req, res) => {
 
 app.get('/api/orders/:orderId/getOrderLines', (req, res) => {
     const orderId = req.params.orderId;
-    if (orderId == '11634') {
+    if (orderId === '11634') {
     }
     const loc = allOrders.findIndex(order => order.id == orderId);
     if (loc === -1) {
@@ -93,7 +93,7 @@ app.post('/api/orders/:orderId/changeOrderDeliveryStatus', (req, res) => {
     }
     const order = allOrders[loc];
     order.fulfillmentStatus = deliveryStatus;
-    if(deliveryStatus=='not-fulfilled'){
+    if(deliveryStatus==='not-fulfilled'){
         notDeliveredCount++;
     }
     else{
@@ -123,32 +123,28 @@ function includesNameOrId(order: any, searchText: string) {
 }
 
 function includesItem(order: any, searchText: string) {
-    //we scan the list of products for an order, to determine if an order has an item that contains the searchedText.
-    // another way of implementing this is scanning products and finding all items that contain the searchedText, and then simply asking if an order has one of these items.
 
-    let i = 0;
-    while (i < order.items.length) {
-        if (products[order.items[i].id].name.includes(searchText)) {
+    for(let item of order.items){
+        if (products[item.id].name.includes(searchText)){
             return true;
         }
-        i++;
     }
     return false;
 }
 
 function passFulfillmentStatusFilter(order: any, deliveryFilter: string) {
-    if (deliveryFilter == 'All') {
+    if (deliveryFilter === 'All') {
         return true;
     }
-    return (deliveryFilter == 'Delivered' && order.fulfillmentStatus == 'fulfilled') || (deliveryFilter == 'Not Delivered' && order.fulfillmentStatus == 'not-fulfilled');
+    return (deliveryFilter === 'Delivered' && order.fulfillmentStatus === 'fulfilled') || (deliveryFilter === 'Not Delivered' && order.fulfillmentStatus === 'not-fulfilled');
 
 }
 
 function passPaymentStatusFilter(order: any, paymentFilter: string) {
-    if (paymentFilter == 'All') {
+    if (paymentFilter === 'All') {
         return true;
     }
-    return (paymentFilter == 'Paid' && order.billingInfo.status == 'paid') || (paymentFilter == 'Not Paid' && order.billingInfo.status == 'not-paid');
+    return (paymentFilter === 'Paid' && order.billingInfo.status === 'paid') || (paymentFilter === 'Not Paid' && order.billingInfo.status === 'not-paid');
 
 }
 
@@ -194,7 +190,7 @@ async function listenToChanges(timeoutInMS:number):Promise<boolean> {
 function checkNotDeliveredOrdersCount(){
     let count = 0;
     for(let order of allOrders){
-        if(order.fulfillmentStatus=='not-fulfilled'){
+        if(order.fulfillmentStatus==='not-fulfilled'){
             ++count;
         }
     }
