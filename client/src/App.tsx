@@ -14,6 +14,7 @@ const theme = createMuiTheme({
 });
 
 export type AppState = {
+    ordersVersion: number,
     totalOrders?: number,
     page: number,
     orders?: Order[],
@@ -22,7 +23,7 @@ export type AppState = {
     search: string,
     changedOrders?: Order[],
     syncPoint: number,
-    totalNotDeliveredOrders?: number
+    totalNotDeliveredOrders?: number,
 }
 
 
@@ -35,7 +36,8 @@ export class App extends React.PureComponent<{}, AppState> {
         page: 1,
         deliveryStatusFilter: 'All',
         paymentStatusFilter: 'All',
-        syncPoint: 0
+        syncPoint: 0,
+        ordersVersion: 1,
     };
     searchDebounce: any = null;
     started: boolean = false;
@@ -52,7 +54,7 @@ export class App extends React.PureComponent<{}, AppState> {
                 await this.wait(2000);
             } else {
                 try {
-                    let waitForOrderChangesResponse = await api.listenToChanges(syncPoint);
+                    let waitForOrderChangesResponse = await api.listenToChanges(syncPoint); // we wait for changes
                     let changedOrders = waitForOrderChangesResponse.changedOrders;
                     let notDeliveredCount = waitForOrderChangesResponse.notDeliveredCount;
                     syncPoint = waitForOrderChangesResponse.syncPoint;
@@ -87,7 +89,6 @@ export class App extends React.PureComponent<{}, AppState> {
             this.initClient();
         }
     }
-
 
     render() {
         const {orders} = this.state;
@@ -134,7 +135,6 @@ export class App extends React.PureComponent<{}, AppState> {
                         </MuiThemeProvider>
                 </span>
                 </div>
-                <div></div>
                 {orders ?
                     <div className='results'>
                         <div className='searchResults'>Showing {orders.length} / {this.state.totalOrders} results</div>
@@ -148,8 +148,9 @@ export class App extends React.PureComponent<{}, AppState> {
 
     renderOrders = (orders: Order[]) => {
         return (
-            <div className='orders'>
-                <InfiniteScroll  initialScrollY={0} next={this.fetchMoreData} hasMore={true}
+            <div key={"orders_"+this.state.ordersVersion} className='orders' >
+
+                <InfiniteScroll next={this.fetchMoreData} hasMore={true}
                                 loader={<h4>{(this.state.totalOrders) ? 'Loading Data..' : ''}</h4>}
                                 dataLength={20 * this.state.page} height={600}>
                     {orders.map((order) => (
@@ -160,6 +161,10 @@ export class App extends React.PureComponent<{}, AppState> {
         )
     };
 
+    scrollToTop = () => {
+        this.state.ordersVersion++;
+    }
+
     handleDeliveryStatusFilterChange = async (ev: any) => {
         const val = ev.target.value;
         this.setState({
@@ -168,7 +173,9 @@ export class App extends React.PureComponent<{}, AppState> {
             orders: await api.getOrders(this.state.search, 1, val, this.state.paymentStatusFilter),
             totalOrders: await api.getOrderCount(this.state.search, val, this.state.paymentStatusFilter)
         });
+        this.scrollToTop();
     };
+
     handlePaymentStatusFilterChange = async (ev: any) => {
         const val = ev.target.value;
         this.setState({
@@ -177,6 +184,7 @@ export class App extends React.PureComponent<{}, AppState> {
             orders: await api.getOrders(this.state.search, 1, this.state.deliveryStatusFilter, val),
             totalOrders: await api.getOrderCount(this.state.search, this.state.deliveryStatusFilter, val)
         });
+        this.scrollToTop();
     };
 
     fetchMoreData = async () => {
@@ -185,8 +193,6 @@ export class App extends React.PureComponent<{}, AppState> {
             page: newPage,
             orders: this.state.orders?.concat(await api.getOrders(this.state.search, newPage, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)),
         });
-        //app has more data when the user scrolls, since the array increases in size and is changed in memory.
-        //make it so that less data is saved?
     }
 
     onSearch = async (value: string) => {
@@ -199,8 +205,8 @@ export class App extends React.PureComponent<{}, AppState> {
                 totalOrders: await api.getOrderCount(value, this.state.deliveryStatusFilter, this.state.paymentStatusFilter)
             });
         }, 300);
+        this.scrollToTop();
     };
 }
-
 
 export default App;
